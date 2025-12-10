@@ -586,55 +586,9 @@ class PdfGenerator(object):
             [self.spacer_three_inch],
             [Paragraph(report_footer_text, self.text_style_normal)],
         ]
-        footer_data = [
-            [
-                [
-                    self.get_img(
-                        "resources/images/donate-paypal.png",
-                        hyperlink="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VZZCNLRHH9BQS",
-                    )
-                ],
-                [
-                    self.get_img(
-                        "resources/images/donate-bitcoin.png",
-                        hyperlink="https://blockstream.info/address/bc1qataspvklhewtswm357m0677q4raag5new2xt3e",
-                    )
-                ],
-                [
-                    self.get_img(
-                        "resources/images/donate-ethereum.png",
-                        hyperlink="https://etherscan.io/address/0x5eAa522e66a90577D49e9E72f253EC952CDB4059",
-                    )
-                ],
-            ],
-            [
-                [
-                    self.get_img(
-                        "resources/images/donate-paypal-qr.png",
-                        hyperlink="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VZZCNLRHH9BQS",
-                    )
-                ],
-                [
-                    self.get_img(
-                        "resources/images/donate-bitcoin-qr.png",
-                        hyperlink="https://blockstream.info/address/bc1qataspvklhewtswm357m0677q4raag5new2xt3e",
-                    )
-                ],
-                [
-                    self.get_img(
-                        "resources/images/donate-ethereum-qr.png",
-                        hyperlink="https://etherscan.io/address/0x5eAa522e66a90577D49e9E72f253EC952CDB4059",
-                    )
-                ],
-            ],
-            [
-                Paragraph("PayPal", self.text_style_small),
-                Paragraph("bc1qataspvklhewtswm357m0677q4raag5new2xt3e", self.text_style_small),
-                Paragraph("0x5eAa522e66a90577D49e9E72f253EC952CDB4059", self.text_style_small),
-            ],
-        ]
+
         self.report_footer_title = Table(footer_title, colWidths=7.75 * inch, style=self.title_style)
-        self.report_footer = Table(footer_data, colWidths=2.50 * inch, style=self.title_style)
+        # self.report_footer = Table(footer_data, colWidths=2.50 * inch, style=self.title_style)
 
         # data for report
         self.report_data = report_data
@@ -1709,11 +1663,12 @@ class PdfGenerator(object):
         donate_header_data = [
             [
                 Paragraph(
-                    "Enjoying the app? Please consider donating to support its development:", self.text_style_italics
-                ),
-                self.get_img(
-                    "resources/images/donate.png",
-                    hyperlink="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VZZCNLRHH9BQS",
+                    ""
+        #             "Enjoying the app? Please consider donating to support its development:", self.text_style_italics
+        #         ),
+        #         self.get_img(
+        #             "resources/images/donate.png",
+        #             hyperlink="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=VZZCNLRHH9BQS",
                 ),
             ]
         ]
@@ -2271,8 +2226,8 @@ class PdfGenerator(object):
         for toc in toc_elements:
             elements.insert(4, toc)
 
-        elements.append(self.report_footer_title)
-        elements.append(self.report_footer)
+        # elements.append(self.report_footer_title)
+        # elements.append(self.report_footer)
 
         # build pdf
         logger.info(f"generating PDF ({str(filename_with_path).split('/')[-1]})...")

@@ -80,9 +80,7 @@ bad_boy_rankings = (
     "The Bad Boy ranking is a \"just-for-fun\" metric that pulls NFL player arrest history from the "
     "<a href=\"https://www.usatoday.com/sports/nfl/arrests/\" color=blue><u>USA Today NFL player arrest "
     "database</u></a>, and then assigns points to all crimes committed by players on each team's starting lineup to "
-    "give the team a total bad boy score. The points assigned to each crime can be found "
-    "<a href=\"https://raw.githubusercontent.com/uberfastman/fantasy-football-metrics-weekly-report/main/resources"
-    "/files/crime_categories.json\" color=blue><u>here</u></a>."
+    "give the team a total bad boy score."
 )
 
 beef_rankings = (

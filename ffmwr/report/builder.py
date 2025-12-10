@@ -352,17 +352,20 @@ class FantasyFootballReport(object):
             / str(self.league.season)
             / f"{self.league.name.replace(' ', '-')}({self.league_id})"
         )
-        report_title_text = f"{self.league.name} ({self.league_id}) Week {self.league.week_for_report} Report"
-        report_footer_text = (
-            f"<para alignment='center'>"
-            f"Report generated {datetime.now():%Y-%b-%d %H:%M:%S} for {self.platform_display} "
-            f'Fantasy Football league "{self.league.name}" with id {self.league_id} '
-            f'(<a href="{self.league.url}" color=blue><u>{self.league.url}</u></a>).'
-            f"<br></br><br></br><br></br>"
-            f"If you enjoy using the Fantasy Football Metrics Weekly Report app, please feel free help support its "
-            f"development below:"
-            f"</para>"
-        )
+
+        report_title_text = self.league.name + " (" + str(self.league_id) + ") Week " + str(self.league.week_for_report) + " Report"
+
+        # report_title_text = f"{self.league.name} ({self.league_id}) Week {self.league.week_for_report} Report"
+        # report_footer_text = (
+        #     f"<para alignment='center'>"
+        #     f"Report generated {datetime.now():%Y-%b-%d %H:%M:%S} for {self.platform_display} "
+        #     f'Fantasy Football league "{self.league.name}" with id {self.league_id} '
+        #     f'(<a href="{self.league.url}" color=blue><u>{self.league.url}</u></a>).'
+        #     f"<br></br><br></br><br></br>"
+        #     f"If you enjoy using the Fantasy Football Metrics Weekly Report app, please feel free help support its "
+        #     f"development below:"
+        #     f"</para>"
+        # )
 
         if not Path(report_save_dir).is_dir():
             os.makedirs(report_save_dir)
@@ -379,7 +382,7 @@ class FantasyFootballReport(object):
             league=self.league,
             playoff_prob_sims=self.playoff_prob_sims,
             report_title_text=report_title_text,
-            report_footer_text=report_footer_text,
+            report_footer_text="",
             report_data=report_data,
         )
 

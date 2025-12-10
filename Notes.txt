@@ -1,0 +1,24 @@
+// TODO //
+[TODO] 1. Add another parameter to league_configs for different league settings on making playoffs
+[TODO] 2. Fix the format spacing on some pages where multiple tables, etc. can be added to one page instead of its own page
+[TODO] 3. Review all documentation and change anything
+[TODO] 4. Fix high roller rankings not getting data
+[TODO] 5. Add WAD (Wins agaisnt Danny) for only the collusion league
+[TODO] 6. Add for collusion league people who played players who scored 0 and need to chug
+
+
+// Ideas to look into //
+1. Graph per team of their average points from a position vs league avg (https://github.com/uberfastman/fantasy-football-metrics-weekly-report/issues/123)
+2. Weekly wager? (https://github.com/uberfastman/fantasy-football-metrics-weekly-report/pull/234/commits/7c22951615ff7861cb74d24337947b9b2193b8a4)
+3. Updated Weekly Luck Record function to also calculate and report Season Luck Record and Ranking/Place (https://github.com/uberfastman/fantasy-football-metrics-weekly-report/pull/227/commits/6d348854ca7370245b7992745ec6f75cfa07eeed)
+4. Look through closed PRs (https://github.com/uberfastman/fantasy-football-metrics-weekly-report/pulls?q=is%3Apr+is%3Aclosed)
+
+
+
+
+
+// Local Commands to run docker and execute code
+docker compose up -d
+docker exec -it fantasy-football-metrics-weekly-report-app-1 python main.py
+docker compose down
+

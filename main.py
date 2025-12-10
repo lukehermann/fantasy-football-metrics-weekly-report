@@ -438,128 +438,141 @@ def main() -> None:
         f"{f_str_newline}"
     )
 
-    report = select_league(
-        app_settings,
-        args.use_default,
-        args.fantasy_platform,
-        args.yahoo_game_id,
-        args.league_id,
-        args.year,
-        args.start_week,
-        args.week,
-        args.break_ties,
-        args.playoff_prob_sims,
-        args.disqualify_coaching_efficiency,
-        args.save_data,
-        args.refresh_feature_web_data,
-        args.offline,
-        args.test,
-    )
-    report_pdf: Path = report.create_pdf_report()
+    # Hard-coded league/platform pairs
+    league_configs = [
+        {"platform": "espn", "league_id": "206814"},                    # Collusion
+        {"platform": "espn", "league_id": "1417633354"},                # Daddys little darlings
+        {"platform": "espn", "league_id": "26827772"},                  # Cousin league
+        {"platform": "espn", "league_id": "1400417607"},                # Bens league
+        {"platform": "sleeper", "league_id": "1258133308135444480"},    # Iowa Mens Volleyball
+        {"platform": "sleeper", "league_id": "1172313857633792000"},    # Dynasty
+    ]
 
-    upload_message = ""
-    if app_settings.integration_settings.google_drive_upload_bool:
-        if not args.skip_uploads and not args.test:
-            google_drive_integration = GoogleDriveIntegration(
-                app_settings, root_directory, report.league.week_for_report
-            )
+    for config in league_configs:
+        logger.info(f"Generating report for {config['platform']} league {config['league_id']}")
 
-            # upload PDF to Google Drive
-            upload_message = google_drive_integration.upload_file(report_pdf)
-            logger.info(upload_message)
-        else:
-            logger.info(f"Report NOT uploaded to Google Drive with command line arguments: {args}")
+        report = select_league(
+            app_settings,
+            True,
+            config["platform"],       # override fantasy_platform
+            args.yahoo_game_id,
+            config["league_id"],      # override league_id
+            args.year,
+            args.start_week,
+            args.week,
+            args.break_ties,
+            args.playoff_prob_sims,
+            args.disqualify_coaching_efficiency,
+            args.save_data,
+            args.refresh_feature_web_data,
+            args.offline,
+            args.test,
+        )
+        report_pdf: Path = report.create_pdf_report()
 
-    if app_settings.integration_settings.slack_post_bool:
-        if not args.skip_uploads and not args.test:
-            slack_integration = SlackIntegration(app_settings, root_directory, report.league.week_for_report)
-
-            # post PDF or link to PDF to Slack
-            slack_response = None
-            post_or_file = app_settings.integration_settings.slack_post_or_file
-            if post_or_file == "post":
-                if app_settings.integration_settings.google_drive_upload_bool:
-                    # post shareable link to uploaded Google Drive PDF on Slack
-                    slack_response = slack_integration.post_message(upload_message)
-                else:
-                    logger.warning("Unable to post Google Drive link to Slack when GOOGLE_DRIVE_UPLOAD_BOOL=False.")
-            elif post_or_file == "file":
-                # upload PDF report directly to Slack
-                slack_response = slack_integration.upload_file(report_pdf)
-            else:
-                logger.warning(
-                    f'The ".env" file contains unsupported Slack setting: '
-                    f'SLACK_POST_OR_FILE={post_or_file}. Please choose "post" or "file" and try again.'
+        upload_message = ""
+        if app_settings.integration_settings.google_drive_upload_bool:
+            if not args.skip_uploads and not args.test:
+                google_drive_integration = GoogleDriveIntegration(
+                    app_settings, root_directory, report.league.week_for_report
                 )
-                sys.exit(1)
 
-            if slack_response and slack_response.get("ok"):
-                logger.info(f"Report {str(report_pdf)} successfully posted to Slack!")
+                # upload PDF to Google Drive
+                upload_message = google_drive_integration.upload_file(report_pdf)
+                logger.info(upload_message)
             else:
-                logger.error(f"Report {str(report_pdf)} was NOT posted to Slack with error: {slack_response}")
-        else:
-            logger.info(f"Report NOT posted to Slack with command line arguments: {args}")
+                logger.info(f"Report NOT uploaded to Google Drive with command line arguments: {args}")
 
-    if app_settings.integration_settings.groupme_post_bool:
-        if not args.skip_uploads and not args.test:
-            groupme_integration = GroupMeIntegration(app_settings, root_directory, report.league.week_for_report)
+        if app_settings.integration_settings.slack_post_bool:
+            if not args.skip_uploads and not args.test:
+                slack_integration = SlackIntegration(app_settings, root_directory, report.league.week_for_report)
 
-            # post PDF or link to PDF to GroupMe
-            groupme_response = None
-            post_or_file = app_settings.integration_settings.groupme_post_or_file
-            if post_or_file == "post":
-                if app_settings.integration_settings.google_drive_upload_bool:
-                    # post shareable link to uploaded Google Drive PDF on GroupMe
-                    groupme_response = groupme_integration.post_message(upload_message)
+                # post PDF or link to PDF to Slack
+                slack_response = None
+                post_or_file = app_settings.integration_settings.slack_post_or_file
+                if post_or_file == "post":
+                    if app_settings.integration_settings.google_drive_upload_bool:
+                        # post shareable link to uploaded Google Drive PDF on Slack
+                        slack_response = slack_integration.post_message(upload_message)
+                    else:
+                        logger.warning("Unable to post Google Drive link to Slack when GOOGLE_DRIVE_UPLOAD_BOOL=False.")
+                elif post_or_file == "file":
+                    # upload PDF report directly to Slack
+                    slack_response = slack_integration.upload_file(report_pdf)
                 else:
-                    logger.warning("Unable to post Google Drive link to GroupMe when GOOGLE_DRIVE_UPLOAD_BOOL=False.")
-            elif post_or_file == "file":
-                # upload PDF report directly to GroupMe
-                groupme_response = groupme_integration.upload_file(report_pdf)
-            else:
-                logger.warning(
-                    f'The ".env" file contains unsupported GroupMe setting: '
-                    f'GROUPME_POST_OR_FILE={post_or_file}. Please choose "post" or "file" and try again.'
-                )
-                sys.exit(1)
+                    logger.warning(
+                        f'The ".env" file contains unsupported Slack setting: '
+                        f'SLACK_POST_OR_FILE={post_or_file}. Please choose "post" or "file" and try again.'
+                    )
+                    sys.exit(1)
 
-            if groupme_response == 202 or groupme_response["meta"]["code"] == 201:
-                logger.info(f"Report {str(report_pdf)} successfully posted to GroupMe!")
-            else:
-                logger.error(f"Report {str(report_pdf)} was NOT posted to GroupMe with error: {groupme_response}")
-        else:
-            logger.info(f"Report NOT posted to GroupMe with command line arguments: {args}")
-
-    if app_settings.integration_settings.discord_post_bool:
-        if not args.skip_uploads and not args.test:
-            discord_integration = DiscordIntegration(app_settings, root_directory, report.league.week_for_report)
-
-            # post PDF or link to PDF to Discord
-            discord_response = None
-            post_or_file = app_settings.integration_settings.discord_post_or_file
-            if post_or_file == "post":
-                if app_settings.integration_settings.google_drive_upload_bool:
-                    # post shareable link to uploaded Google Drive PDF on Discord
-                    discord_response = discord_integration.post_message(upload_message)
+                if slack_response and slack_response.get("ok"):
+                    logger.info(f"Report {str(report_pdf)} successfully posted to Slack!")
                 else:
-                    logger.warning("Unable to post Google Drive link to Discord when GOOGLE_DRIVE_UPLOAD_BOOL=False.")
-
-            elif post_or_file == "file":
-                # upload PDF report directly to Discord
-                discord_response = discord_integration.upload_file(report_pdf)
+                    logger.error(f"Report {str(report_pdf)} was NOT posted to Slack with error: {slack_response}")
             else:
-                logger.warning(
-                    f'The ".env" file contains unsupported Discord setting: '
-                    f'DISCORD_POST_OR_FILE={post_or_file}. Please choose "post" or "file" and try again.'
-                )
-                sys.exit(1)
+                logger.info(f"Report NOT posted to Slack with command line arguments: {args}")
 
-            if discord_response and discord_response.get("type") == 0:
-                logger.info(f"Report {str(report_pdf)} successfully posted to Discord!")
+        if app_settings.integration_settings.groupme_post_bool:
+            if not args.skip_uploads and not args.test:
+                groupme_integration = GroupMeIntegration(app_settings, root_directory, report.league.week_for_report)
+
+                # post PDF or link to PDF to GroupMe
+                groupme_response = None
+                post_or_file = app_settings.integration_settings.groupme_post_or_file
+                if post_or_file == "post":
+                    if app_settings.integration_settings.google_drive_upload_bool:
+                        # post shareable link to uploaded Google Drive PDF on GroupMe
+                        groupme_response = groupme_integration.post_message(upload_message)
+                    else:
+                        logger.warning("Unable to post Google Drive link to GroupMe when GOOGLE_DRIVE_UPLOAD_BOOL=False.")
+                elif post_or_file == "file":
+                    # upload PDF report directly to GroupMe
+                    groupme_response = groupme_integration.upload_file(report_pdf)
+                else:
+                    logger.warning(
+                        f'The ".env" file contains unsupported GroupMe setting: '
+                        f'GROUPME_POST_OR_FILE={post_or_file}. Please choose "post" or "file" and try again.'
+                    )
+                    sys.exit(1)
+
+                if groupme_response == 202 or groupme_response["meta"]["code"] == 201:
+                    logger.info(f"Report {str(report_pdf)} successfully posted to GroupMe!")
+                else:
+                    logger.error(f"Report {str(report_pdf)} was NOT posted to GroupMe with error: {groupme_response}")
             else:
-                logger.error(f"Report {str(report_pdf)} was NOT posted to Discord with error: {discord_response}")
-        else:
-            logger.info(f"Report NOT posted to Discord with command line arguments: {args}")
+                logger.info(f"Report NOT posted to GroupMe with command line arguments: {args}")
+
+        if app_settings.integration_settings.discord_post_bool:
+            if not args.skip_uploads and not args.test:
+                discord_integration = DiscordIntegration(app_settings, root_directory, report.league.week_for_report)
+
+                # post PDF or link to PDF to Discord
+                discord_response = None
+                post_or_file = app_settings.integration_settings.discord_post_or_file
+                if post_or_file == "post":
+                    if app_settings.integration_settings.google_drive_upload_bool:
+                        # post shareable link to uploaded Google Drive PDF on Discord
+                        discord_response = discord_integration.post_message(upload_message)
+                    else:
+                        logger.warning("Unable to post Google Drive link to Discord when GOOGLE_DRIVE_UPLOAD_BOOL=False.")
+
+                elif post_or_file == "file":
+                    # upload PDF report directly to Discord
+                    discord_response = discord_integration.upload_file(report_pdf)
+                else:
+                    logger.warning(
+                        f'The ".env" file contains unsupported Discord setting: '
+                        f'DISCORD_POST_OR_FILE={post_or_file}. Please choose "post" or "file" and try again.'
+                    )
+                    sys.exit(1)
+
+                if discord_response and discord_response.get("type") == 0:
+                    logger.info(f"Report {str(report_pdf)} successfully posted to Discord!")
+                else:
+                    logger.error(f"Report {str(report_pdf)} was NOT posted to Discord with error: {discord_response}")
+            else:
+                logger.info(f"Report NOT posted to Discord with command line arguments: {args}")
 
 
 # RUN FANTASY FOOTBALL REPORT PROGRAM
